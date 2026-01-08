@@ -1,2 +1,2 @@
 # sp
-动态阈值秘密共享系统应用程序，支持阈值双向调整和份额更新
+This code is a research prototype; feedback is welcome.
