@@ -1,44 +1,46 @@
+package code;
+
+import javax.imageio.ImageIO;
+import javax.swing.*;
+import javax.swing.Timer;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
-import java.awt.*;
-import java.awt.geom.*;
 import java.util.List;
-import javax.imageio.ImageIO;
-import javax.swing.*;
-import javax.swing.Timer;
 
 /**
- * 性能图表类：用于可视化展示动态阈值秘密共享系统的性能数据
- * 支持绘制折线图、柱状图等多种图表类型
+ * Performance-chart component: visualises performance data for the dynamic-threshold secret-sharing system
+ * Supports line charts, bar charts and other plot types
  */
 public class PerformanceChart extends JPanel {
     private Map<Integer, Map<String, Double>> performanceData;
-    // 扩展颜色数组以支持更多操作
+    // Extended colour palette for additional operations
     private Color[] colors = {Color.BLUE, Color.RED, Color.GREEN, Color.ORANGE, Color.DARK_GRAY,
             Color.MAGENTA, Color.CYAN, Color.GRAY, Color.YELLOW};
-    // 扩展操作列表
+    // Extended operation list
     private String[] operations = {
-            "系统初始化(ms)", "阈值下调(ms)", "阈值扩展(ms)", "阈值上调(ms)",
-            "工作份额更新(ms)", "主份额更新(ms)","工作份额恢复(ms)", "主份额恢复(ms)", "混合场景(ms)"
+            "System Init (ms)", "Threshold Decrease (ms)", "Threshold Expansion (ms)", "Threshold Increase (ms)",
+            "Working-Share Update (ms)", "Master-Share Update (ms)","Working-Share Recovery (ms)", "Master-Share Recovery (ms)", "Mixed Scenario (ms)"
     };
 
     /**
-     * 默认构造函数
+     * Default constructor
      */
     public PerformanceChart() {
-        // 初始化数据结构
+        // Initialise data structures
         performanceData = new TreeMap<>();
-        // 正确初始化每个阈值的数据
+        // Properly initialise data for each threshold
         initializeData();
         setPreferredSize(new Dimension(800, 600));
         setBackground(Color.WHITE);
     }
 
     /**
-     * 带数据参数的构造函数
-     * @param data 性能数据
+     * Constructor with data parameter
+     * @param data performance data
      */
     public PerformanceChart(Map<Integer, Map<String, Double>> data) {
         this.performanceData = new TreeMap<>(data);
@@ -47,43 +49,43 @@ public class PerformanceChart extends JPanel {
     }
 
     /**
-     * 初始化示例数据（用于测试）
+     * Initialise sample data (for testing)
      */
     private void initializeData() {
-        // 阈值4的数据
+        // Threshold t = 4
         Map<String, Double> t4Data = new HashMap<>();
-        t4Data.put("系统初始化(ms)", 12.3);
-        t4Data.put("阈值下调(ms)", 45.7);
-        t4Data.put("阈值上调(ms)", 38.2);
-        t4Data.put("工作份额更新(ms)", 8.9);
-        t4Data.put("主份额更新(ms)", 10.1);
-        t4Data.put("秘密恢复(ms)", 5.4);
+        t4Data.put("System Init (ms)", 12.3);
+        t4Data.put("Threshold Decrease (ms)", 45.7);
+        t4Data.put("Threshold Increase (ms)", 38.2);
+        t4Data.put("Working-Share Update (ms)", 8.9);
+        t4Data.put("Master-Share Update (ms)", 10.1);
+        t4Data.put("Secret Recovery (ms)", 5.4);
         performanceData.put(4, t4Data);
 
-        // 阈值5的数据
+        // Threshold t = 5
         Map<String, Double> t5Data = new HashMap<>();
-        t5Data.put("系统初始化(ms)", 15.2);
-        t5Data.put("阈值下调(ms)", 50.5);
-        t5Data.put("阈值上调(ms)", 42.8);
-        t5Data.put("工作份额更新(ms)", 9.9);
-        t5Data.put("主份额更新(ms)", 11.3);
-        t5Data.put("秘密恢复(ms)", 6.1);
+        t5Data.put("System Init (ms)", 15.2);
+        t5Data.put("Threshold Decrease (ms)", 50.5);
+        t5Data.put("Threshold Increase (ms)", 42.8);
+        t5Data.put("Working-Share Update (ms)", 9.9);
+        t5Data.put("Master-Share Update (ms)", 11.3);
+        t5Data.put("Secret Recovery (ms)", 6.1);
         performanceData.put(5, t5Data);
 
-        // 阈值6的数据
+        // Threshold t = 6
         Map<String, Double> t6Data = new HashMap<>();
-        t6Data.put("系统初始化(ms)", 18.6);
-        t6Data.put("阈值下调(ms)", 55.8);
-        t6Data.put("阈值上调(ms)", 47.5);
-        t6Data.put("工作份额更新(ms)", 10.5);
-        t5Data.put("主份额更新(ms)", 12.7);
-        t6Data.put("秘密恢复(ms)", 6.8);
+        t6Data.put("System Init (ms)", 18.6);
+        t6Data.put("Threshold Decrease (ms)", 55.8);
+        t6Data.put("Threshold Increase (ms)", 47.5);
+        t6Data.put("Working-Share Update (ms)", 10.5);
+        t5Data.put("Master-Share Update (ms)", 12.7);
+        t6Data.put("Secret Recovery (ms)", 6.8);
         performanceData.put(6, t6Data);
     }
 
     /**
-     * 绘制组件
-     * @param g 图形上下文
+     * Paint component
+     * @param g graphics context
      */
     @Override
     protected void paintComponent(Graphics g) {
@@ -97,28 +99,28 @@ public class PerformanceChart extends JPanel {
     }
 
     /**
-     * 绘制图表标题
-     * @param g2 图形上下文
+     * Draw chart title
+     * @param g2 graphics context
      */
     private void drawTitle(Graphics2D g2) {
         g2.setColor(Color.BLACK);
-        g2.setFont(new Font("宋体", Font.BOLD, 16));
+        g2.setFont(new Font("SimSun", Font.BOLD, 16));
 
-        // 根据数据内容动态生成标题
-        String title = "动态阈值秘密共享系统性能分析";
+        // Generate title dynamically based on data content
+        String title = "Dynamic-Threshold Secret-Sharing System Performance Analysis";
         if (performanceData != null && !performanceData.isEmpty()) {
             boolean hasPrecompute = performanceData.values().stream()
-                    .anyMatch(data -> data.containsKey("预计算时间(ms)") && data.get("预计算时间(ms)") > 0);
+                    .anyMatch(data -> data.containsKey("Precompute Time (ms)") && data.get("Precompute Time (ms)") > 0);
 
             if (hasPrecompute) {
-                title = "包含预计算的系统性能分析";
+                title = "System Performance Analysis with Pre-computation";
             }
         }
 
         int titleWidth = g2.getFontMetrics().stringWidth(title);
         g2.drawString(title, (getWidth() - titleWidth) / 2, 30);
 
-        // 英文标题
+        // English title
         g2.setFont(new Font("Arial", Font.PLAIN, 12));
         String englishTitle = "Performance Analysis of Dynamic Threshold Secret Sharing System";
         int englishTitleWidth = g2.getFontMetrics().stringWidth(englishTitle);
@@ -126,93 +128,93 @@ public class PerformanceChart extends JPanel {
     }
 
     /**
-     * 绘制主图表
-     * @param g2 图形上下文
+     * Draw main chart
+     * @param g2 graphics context
      */
     private void drawChart(Graphics2D g2) {
         int padding = 80;
         int chartWidth = getWidth() - 2 * padding;
-        int chartHeight = getHeight() - 2 * padding - 50; // 为标题留出空间
+        int chartHeight = getHeight() - 2 * padding - 50; // reserve space for title
 
-        // 绘制坐标轴
+        // Draw axes
         g2.setColor(Color.BLACK);
         g2.setStroke(new BasicStroke(2));
-        g2.drawLine(padding, padding, padding, padding + chartHeight); // Y轴
-        g2.drawLine(padding, padding + chartHeight, padding + chartWidth, padding + chartHeight); // X轴
+        g2.drawLine(padding, padding, padding, padding + chartHeight); // Y-axis
+        g2.drawLine(padding, padding + chartHeight, padding + chartWidth, padding + chartHeight); // X-axis
 
-        // 绘制箭头
-        drawArrow(g2, padding, padding, true); // Y轴箭头
-        drawArrow(g2, padding + chartWidth, padding + chartHeight, false); // X轴箭头
+        // Draw arrows
+        drawArrow(g2, padding, padding, true); // Y-axis arrow
+        drawArrow(g2, padding + chartWidth, padding + chartHeight, false); // X-axis arrow
 
-        // 绘制刻度和标签
+        // Draw ticks and labels
         drawAxesLabels(g2, padding, chartWidth, chartHeight);
 
-        // 绘制数据线
+        // Draw data lines
         drawDataLines(g2, padding, chartWidth, chartHeight);
     }
 
     /**
-     * 绘制坐标轴箭头
-     * @param g2 图形上下文
-     * @param x 箭头x坐标
-     * @param y 箭头y坐标
-     * @param isVertical 是否为垂直箭头
+     * Draw axis arrows
+     * @param g2 graphics context
+     * @param x arrow x-coordinate
+     * @param y arrow y-coordinate
+     * @param isVertical vertical arrow flag
      */
     private void drawArrow(Graphics2D g2, int x, int y, boolean isVertical) {
         int arrowSize = 8;
         if (isVertical) {
-            // Y轴箭头（向上）
+            // Y-axis arrow (upward)
             g2.drawLine(x, y, x - arrowSize/2, y + arrowSize);
             g2.drawLine(x, y, x + arrowSize/2, y + arrowSize);
         } else {
-            // X轴箭头（向右）
+            // X-axis arrow (rightward)
             g2.drawLine(x, y, x - arrowSize, y - arrowSize/2);
             g2.drawLine(x, y, x - arrowSize, y + arrowSize/2);
         }
     }
 
     /**
-     * 绘制坐标轴标签和刻度
-     * @param g2 图形上下文
-     * @param padding 内边距
-     * @param chartWidth 图表宽度
-     * @param chartHeight 图表高度
+     * Draw axis labels and ticks
+     * @param g2 graphics context
+     * @param padding padding
+     * @param chartWidth chart width
+     * @param chartHeight chart height
      */
     private void drawAxesLabels(Graphics2D g2, int padding, int chartWidth, int chartHeight) {
-        // X轴标签 - 阈值
+        // X-axis labels – threshold
         Integer[] thresholds = performanceData.keySet().toArray(new Integer[0]);
         int xStep = chartWidth / (thresholds.length + 1);
 
-        g2.setFont(new Font("宋体", Font.PLAIN, 12));
+        g2.setFont(new Font("SimSun", Font.PLAIN, 12));
         for (int i = 0; i < thresholds.length; i++) {
             int x = padding + (i + 1) * xStep;
             g2.drawString("t=" + thresholds[i], x - 10, padding + chartHeight + 20);
 
-            // 绘制X轴刻度
+            // Draw X-axis tick
             g2.drawLine(x, padding + chartHeight, x, padding + chartHeight + 5);
         }
 
-        // X轴标题
-        g2.setFont(new Font("宋体", Font.BOLD, 14));
-        String xLabel = "阈值 t (Threshold t)";
+        // X-axis title
+        g2.setFont(new Font("SimSun", Font.BOLD, 14));
+        String xLabel = "Threshold t (Threshold t)";
         int xLabelWidth = g2.getFontMetrics().stringWidth(xLabel);
         g2.drawString(xLabel, padding + chartWidth/2 - xLabelWidth/2, padding + chartHeight + 40);
 
-        // Y轴标签 - 执行时间
+        // Y-axis labels – execution time
         double maxTime = getMaxExecutionTime();
         int ySteps = 6;
         double timeStep = maxTime / ySteps;
 
-        g2.setFont(new Font("宋体", Font.PLAIN, 12));
+        g2.setFont(new Font("SimSun", Font.PLAIN, 12));
         for (int i = 0; i <= ySteps; i++) {
             int y = padding + chartHeight - (int)((i * timeStep) / maxTime * chartHeight);
             String label = String.format("%.1f", i * timeStep);
             g2.drawString(label, padding - 30, y + 5);
 
-            // 绘制Y轴刻度
+            // Draw Y-axis tick
             g2.drawLine(padding, y, padding - 5, y);
 
-            // 绘制网格线
+            // Draw grid line
             g2.setColor(Color.LIGHT_GRAY);
             g2.setStroke(new BasicStroke(1));
             g2.drawLine(padding, y, padding + chartWidth, y);
@@ -220,10 +222,10 @@ public class PerformanceChart extends JPanel {
             g2.setStroke(new BasicStroke(2));
         }
 
-        // Y轴标题
-        g2.setFont(new Font("宋体", Font.BOLD, 14));
-        String yLabel = "执行时间 (Execution Time / ms)";
-        // 垂直绘制Y轴标签
+        // Y-axis title
+        g2.setFont(new Font("SimSun", Font.BOLD, 14));
+        String yLabel = "Execution Time (Execution Time / ms)";
+        // Draw Y-axis label vertically
         FontMetrics fm = g2.getFontMetrics();
         int yLabelWidth = fm.stringWidth(yLabel);
         AffineTransform originalTransform = g2.getTransform();
@@ -233,11 +235,11 @@ public class PerformanceChart extends JPanel {
     }
 
     /**
-     * 绘制数据线
-     * @param g2 图形上下文
-     * @param padding 内边距
-     * @param chartWidth 图表宽度
-     * @param chartHeight 图表高度
+     * Draw data lines
+     * @param g2 graphics context
+     * @param padding padding
+     * @param chartWidth chart width
+     * @param chartHeight chart height
      */
     private void drawDataLines(Graphics2D g2, int padding, int chartWidth, int chartHeight) {
         Integer[] thresholds = performanceData.keySet().toArray(new Integer[0]);
@@ -252,7 +254,7 @@ public class PerformanceChart extends JPanel {
             List<Point> points = new ArrayList<>();
             for (int i = 0; i < thresholds.length; i++) {
                 int threshold = thresholds[i];
-                // 添加空值检查
+                // null check
                 Map<String, Double> thresholdData = performanceData.get(threshold);
                 if (thresholdData == null) continue;
 
@@ -263,10 +265,10 @@ public class PerformanceChart extends JPanel {
                 int y = padding + chartHeight - (int)((time / maxTime) * chartHeight);
                 points.add(new Point(x, y));
 
-                // 绘制数据点
+                // Draw data point
                 g2.fillOval(x - 4, y - 4, 8, 8);
 
-                // 在数据点旁边显示具体数值
+                // Display exact value next to the point
                 g2.setColor(Color.BLACK);
                 g2.setFont(new Font("Arial", Font.PLAIN, 10));
                 String valueLabel = String.format("%.3f", time);
@@ -274,7 +276,7 @@ public class PerformanceChart extends JPanel {
                 g2.setColor(colors[opIndex]);
             }
 
-            // 绘制连线
+            // Draw connecting lines
             for (int i = 0; i < points.size() - 1; i++) {
                 Point p1 = points.get(i);
                 Point p2 = points.get(i + 1);
@@ -284,24 +286,24 @@ public class PerformanceChart extends JPanel {
     }
 
     /**
-     * 绘制图例
-     * @param g2 图形上下文
+     * Draw legend
+     * @param g2 graphics context
      */
     private void drawLegend(Graphics2D g2) {
         int legendX = getWidth() - 200;
         int legendY = 80;
 
         g2.setColor(Color.BLACK);
-        g2.setFont(new Font("宋体", Font.BOLD, 14));
-        g2.drawString("图例 (Legend)", legendX, legendY - 10);
+        g2.setFont(new Font("SimSun", Font.BOLD, 14));
+        g2.drawString("Legend (Legend)", legendX, legendY - 10);
 
-        // 绘制图例背景
+        // Draw legend background
         g2.setColor(new Color(255, 255, 255, 200));
         g2.fillRect(legendX - 10, legendY, 180, operations.length * 25 + 10);
         g2.setColor(Color.GRAY);
         g2.drawRect(legendX - 10, legendY, 180, operations.length * 25 + 10);
 
-        g2.setFont(new Font("宋体", Font.PLAIN, 12));
+        g2.setFont(new Font("SimSun", Font.PLAIN, 12));
         for (int i = 0; i < operations.length; i++) {
             g2.setColor(colors[i]);
             g2.fillRect(legendX, legendY + i * 25 + 10, 15, 15);
@@ -311,8 +313,8 @@ public class PerformanceChart extends JPanel {
     }
 
     /**
-     * 获取最大执行时间（用于Y轴缩放）
-     * @return 最大执行时间
+     * Get maximum execution time (for Y-axis scaling)
+     * @return maximum execution time
      */
     private double getMaxExecutionTime() {
         double max = 0;
@@ -322,14 +324,14 @@ public class PerformanceChart extends JPanel {
                 if (time > max) max = time;
             }
         }
-        return max * 1.1; // 增加10%的余量
+        return max * 1.1; // 10 % margin
     }
 
     /**
-     * 更新性能数据
-     * @param threshold 阈值
-     * @param operation 操作名称
-     * @param time 执行时间
+     * Update performance data
+     * @param threshold threshold
+     * @param operation operation name
+     * @param time execution time
      */
     public void updatePerformanceData(int threshold, String operation, double time) {
         if (!performanceData.containsKey(threshold)) {
@@ -340,8 +342,8 @@ public class PerformanceChart extends JPanel {
     }
 
     /**
-     * 设置真实性能数据
-     * @param data 性能数据
+     * Set actual performance data
+     * @param data performance data
      */
     public void setPerformanceData(Map<Integer, Map<String, Double>> data) {
         this.performanceData = new TreeMap<>();
@@ -352,49 +354,49 @@ public class PerformanceChart extends JPanel {
     }
 
     /**
-     * 保存图表为PNG文件
-     * @param filename 文件名
+     * Save chart as PNG file
+     * @param filename file name
      */
     public void saveChartAsImage(String filename) {
-        // 创建与面板相同尺寸的缓冲图像
+        // Create buffered image with same dimensions as panel
         BufferedImage image = new BufferedImage(getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB);
         Graphics2D g2 = image.createGraphics();
 
-        // 设置背景为白色
+        // Set white background
         g2.setColor(Color.WHITE);
         g2.fillRect(0, 0, getWidth(), getHeight());
 
-        // 将面板内容绘制到图像上
+        // Paint panel contents onto image
         paint(g2);
 
         try {
-            // 保存为PNG文件
+            // Save as PNG
             File file = new File(filename);
             ImageIO.write(image, "PNG", file);
-            System.out.println("图表已保存为: " + file.getAbsolutePath());
+            System.out.println("Chart saved as: " + file.getAbsolutePath());
         } catch (IOException e) {
-            System.err.println("保存图表时出错: " + e.getMessage());
+            System.err.println("Error saving chart: " + e.getMessage());
         } finally {
             g2.dispose();
         }
     }
 
     /**
-     * 创建并保存图表
-     * @param performanceData 性能数据
-     * @param filename 文件名
+     * Create and save chart
+     * @param performanceData performance data
+     * @param filename file name
      */
     public void createAndSaveChart(Map<Integer, Map<String, Double>> performanceData, String filename) {
         PerformanceChart chart = new PerformanceChart(performanceData);
         chart.setPreferredSize(new Dimension(1000, 700));
 
-        // 创建临时框架以确保正确渲染
+        // Create temporary frame to ensure proper rendering
         JFrame tempFrame = new JFrame();
         tempFrame.add(chart);
         tempFrame.pack();
         tempFrame.setVisible(true);
 
-        // 延迟保存以确保渲染完成
+        // Delay save to ensure rendering completion
         Timer timer = new Timer(500, e -> {
             chart.saveChartAsImage(filename);
             tempFrame.dispose();
@@ -404,13 +406,13 @@ public class PerformanceChart extends JPanel {
     }
 
     /**
-     * 主方法：测试图表功能
-     * @param args 命令行参数
+     * Main method: test chart functionality
+     * @param args command-line arguments
      */
     public static void main(String[] args) {
-        // 使用SwingUtilities确保在事件分发线程中运行
+        // Use SwingUtilities to run on Event Dispatch Thread
         SwingUtilities.invokeLater(() -> {
-            JFrame frame = new JFrame("动态阈值秘密共享系统性能图表");
+            JFrame frame = new JFrame("Dynamic-Threshold Secret-Sharing System Performance Chart");
             frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
             PerformanceChart chart = new PerformanceChart();
