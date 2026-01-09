@@ -5,7 +5,7 @@ import java.util.*;
 import java.util.concurrent.*;
 
 /**
- * 动态阈值秘密共享系统版本7应用程序 - 严格遵循文档方案
+ * 动态阈值秘密共享系统版本9应用程序 - 严格遵循论文方案
  * 实现4.1-4.6节的所有协议和验证
  */
 public class DynamicThresholdSecretSharingVersion9App {
@@ -67,7 +67,7 @@ public class DynamicThresholdSecretSharingVersion9App {
     }
 
     /**
-     * 系统初始化：严格按照文档4.2节实现
+     * 系统初始化：严格按照论文4.2节实现
      */
     public void systemInitialization(BigInteger secret) {
         long startTime = System.nanoTime();
@@ -80,11 +80,11 @@ public class DynamicThresholdSecretSharingVersion9App {
 
         this.secret = secret;
 
-        // 生成对称双变量多项式 - 严格遵循文档4.2节公式
+        // 生成对称双变量多项式 - 严格遵循论文4.2节公式
         if (verbose) System.out.println("步骤1: 生成对称双变量多项式 f(x,y)");
         this.mainPolynomial = new BivariatePolynomial(currentThreshold, p, secret, verbose);
 
-        // 生成主份额 - 严格遵循文档4.3.1节
+        // 生成主份额 - 严格遵循论文4.3.1节
         if (verbose) System.out.println("步骤2: 生成主份额 S_i(y) = f(ID_i, y)");
         this.mainShares = new ArrayList<>();
         for (int i = 0; i < participantIDs.size(); i++) {
@@ -93,7 +93,7 @@ public class DynamicThresholdSecretSharingVersion9App {
             mainShares.add(share);
         }
 
-        // 生成工作份额 - 严格遵循文档4.3.2节
+        // 生成工作份额 - 严格遵循论文4.3.2节
         if (verbose) System.out.println("步骤3: 生成工作份额 T_i = S_i(0) = f(ID_i, 0)");
         this.workingShares = new ArrayList<>();
         for (int i = 0; i < n; i++) {
@@ -112,7 +112,7 @@ public class DynamicThresholdSecretSharingVersion9App {
     }
 
     /**
-     * 安全阈值下调协议：严格按照文档4.4.2节实现
+     * 安全阈值下调协议：严格按照论文4.4.2节实现
      */
     public void thresholdDecrease(int newThreshold) {
         if (newThreshold >= currentThreshold) {
@@ -128,19 +128,19 @@ public class DynamicThresholdSecretSharingVersion9App {
             System.out.println("当前阈值: " + currentThreshold + " → 新阈值: " + newThreshold);
         }
 
-        // 步骤1: 本地计算拉格朗日分量 - 严格遵循文档步骤一
+        // 步骤1: 本地计算拉格朗日分量 - 严格遵循论文步骤一
         if (verbose) System.out.println("步骤1: 本地计算拉格朗日分量 c_i = S_i(0) × L_i");
         List<BigInteger> lagrangeComponents = computeLagrangeComponents(currentThreshold);
 
-        // 步骤2: 本地生成重共享多项式 - 严格遵循文档步骤二
+        // 步骤2: 本地生成重共享多项式 - 严格遵循论文步骤二
         if (verbose) System.out.println("步骤2: 本地生成重共享多项式 h_i(x,y)");
         List<BivariatePolynomial> resharePolynomials = generateResharePolynomials(lagrangeComponents, newThreshold);
 
-        // 步骤3: 本地生成加密共享值并广播 - 严格遵循文档步骤三
+        // 步骤3: 本地生成加密共享值并广播 - 严格遵循论文步骤三
         if (verbose) System.out.println("步骤3: 生成加密共享值并广播 C_ik = v_ik + k_ik");
         List<List<BigInteger>> encryptedShares = generateEncryptedShares(resharePolynomials);
 
-        // 步骤4: 并行解密与计算工作份额 - 严格遵循文档步骤四
+        // 步骤4: 并行解密与计算工作份额 - 严格遵循论文步骤四
         if (verbose) System.out.println("步骤4: 并行解密并计算新工作份额");
         updateWorkingShares(encryptedShares);
 
@@ -197,7 +197,7 @@ public class DynamicThresholdSecretSharingVersion9App {
 
             for (int j = 0; j < n; j++) {
                 BigInteger shareValue = poly.evaluate(participantIDs.get(j), BigInteger.ZERO);
-                // 使用当前主多项式计算配对密钥 - 严格遵循文档
+                // 使用当前主多项式计算配对密钥 - 严格遵循论文
                 BigInteger pairingKey = mainPolynomial.evaluate(participantIDs.get(i), participantIDs.get(j));
                 BigInteger encrypted = shareValue.add(pairingKey).mod(p);
                 encryptedRow.add(encrypted);
@@ -216,7 +216,7 @@ public class DynamicThresholdSecretSharingVersion9App {
             BigInteger sum = BigInteger.ZERO;
             for (int i = 0; i < encryptedShares.size(); i++) {
                 BigInteger encrypted = encryptedShares.get(i).get(k);
-                // 使用当前主多项式计算配对密钥 - 严格遵循文档
+                // 使用当前主多项式计算配对密钥 - 严格遵循论文
                 BigInteger pairingKey = mainPolynomial.evaluate(participantIDs.get(k), participantIDs.get(i));
                 BigInteger decrypted = encrypted.subtract(pairingKey).mod(p);
                 sum = sum.add(decrypted).mod(p);
@@ -281,7 +281,7 @@ public class DynamicThresholdSecretSharingVersion9App {
     }
 
     /**
-     * 安全阈值扩展协议：严格按照文档4.4.1节实现
+     * 安全阈值预扩展协议：严格按照论文4.4.1节实现
      * 优化：采用纯多项式扩展而非叠加方式
      */
     public void thresholdIncrease(int newThreshold) {
@@ -300,12 +300,12 @@ public class DynamicThresholdSecretSharingVersion9App {
 
         int k = newThreshold - currentThreshold;
 
-        // 优化步骤1: 直接构造扩展后的多项式 - 严格遵循文档扩展设计
+        // 优化步骤1: 直接构造扩展后的多项式 - 严格遵循论文扩展设计
         if (verbose) System.out.println("步骤1: 直接构造扩展后的对称双变量多项式");
         this.mainPolynomial = buildExtendedPolynomialDirectly(newThreshold);
 
         // 新增: 严格验证扩展多项式
-        if (verbose) System.out.println("步骤1.1: 验证扩展多项式符合文档技术要求");
+        if (verbose) System.out.println("步骤1.1: 验证扩展多项式符合论文技术要求");
         validateExtendedPolynomial(this.mainPolynomial, currentThreshold, newThreshold);
 
         // 优化步骤2: 重新生成主份额 - 基于新多项式
@@ -324,14 +324,14 @@ public class DynamicThresholdSecretSharingVersion9App {
         stats.addThresholdIncreaseTime(endTime - startTime);
 
         if (verbose) {
-            System.out.println("✓ 安全阈值扩展完成（严格遵循文档扩展方案）");
+            System.out.println("✓ 安全阈值扩展完成（严格遵循论文扩展方案）");
             System.out.printf("阈值扩展总时间: %.3f ms\n", (endTime - startTime) / 1e6);
             System.out.println("=".repeat(60));
         }
     }
 
     /**
-     * 验证扩展多项式是否符合文档技术要求
+     * 验证扩展多项式是否符合论文技术要求
      */
     private void validateExtendedPolynomial(BivariatePolynomial extendedPoly, int originalThreshold, int newThreshold) {
         // 验证1: 低阶系数保持不变
@@ -373,7 +373,7 @@ public class DynamicThresholdSecretSharingVersion9App {
     }
 
     /**
-     * 基于扩展多项式重新生成工作份额 - 严格遵循文档工作份额定义
+     * 基于扩展多项式重新生成工作份额 - 严格遵循论文工作份额定义
      */
     private void updateWorkingSharesForExtension(int newThreshold) {
         if (verbose) System.out.println("  重新计算 " + n + " 个参与者的工作份额");
@@ -391,7 +391,7 @@ public class DynamicThresholdSecretSharingVersion9App {
     }
 
     /**
-     * 基于扩展多项式重新生成主份额 - 严格遵循文档主份额定义
+     * 基于扩展多项式重新生成主份额 - 严格遵循论文主份额定义
      */
     private void updateMainSharesForExtension(int newThreshold) {
         if (verbose) System.out.println("  重新计算 " + n + " 个参与者的主份额");
@@ -409,7 +409,7 @@ public class DynamicThresholdSecretSharingVersion9App {
     }
 
     /**
-     * 直接构造扩展后的多项式 - 严格遵循文档4.4.1节数学描述
+     * 直接构造扩展后的多项式 - 严格遵循论文4.4.1节数学描述
      * 核心：保持低阶系数不变，仅扩展高阶随机系数
      */
     private BivariatePolynomial buildExtendedPolynomialDirectly(int newThreshold) {
@@ -424,7 +424,7 @@ public class DynamicThresholdSecretSharingVersion9App {
             }
         }
 
-        // 步骤2: 生成扩展的高阶随机系数 - 严格遵循文档扩展设计
+        // 步骤2: 生成扩展的高阶随机系数 - 严格遵循论文扩展设计
         if (verbose) System.out.println("  生成扩展高阶随机系数 (" + currentThreshold + " ≤ i,j < " + newThreshold + ")");
         SecureRandom secureRandom = BCCryptoUtils.createSecureRandom(null);
 
@@ -462,7 +462,7 @@ public class DynamicThresholdSecretSharingVersion9App {
      * 生成扩展多项式 - 辅助方法
      */
     private BivariatePolynomial generateExtensionPolynomial(int k) {
-        // 创建扩展多项式，常数项为0 - 严格遵循文档要求
+        // 创建扩展多项式，常数项为0 - 严格遵循论文要求
         BivariatePolynomial extensionPoly = new BivariatePolynomial(currentThreshold + k, p, BigInteger.ZERO, false);
 
         // 只设置高阶系数，保持低阶系数为0 - 关键修复
@@ -530,7 +530,7 @@ public class DynamicThresholdSecretSharingVersion9App {
     }
 
     /**
-     * 工作份额更新协议：严格按照文档4.5.1节实现
+     * 工作份额更新协议：严格按照论文4.5.1节实现
      */
     public void workingShareUpdate(String contextInfo, int updateRound) {
         long startTime = System.nanoTime();
@@ -541,13 +541,13 @@ public class DynamicThresholdSecretSharingVersion9App {
             System.out.println("=".repeat(60));
         }
 
-        // 步骤1: 生成公共随机种子 - 严格遵循文档步骤一
+        // 步骤1: 生成公共随机种子 - 严格遵循论文步骤一
         BigInteger randomSeed = generateRandomSeed(contextInfo, updateRound);
 
-        // 步骤2: 生成更新多项式 - 严格遵循文档步骤二
+        // 步骤2: 生成更新多项式 - 严格遵循论文步骤二
         BivariatePolynomial updatePoly = generateUpdatePolynomial(randomSeed, currentThreshold);
 
-        // 步骤3: 更新本地工作份额 - 严格遵循文档步骤三
+        // 步骤3: 更新本地工作份额 - 严格遵循论文步骤三
         updateWorkingSharesWithPoly(updatePoly);
 
         long endTime = System.nanoTime();
@@ -573,7 +573,7 @@ public class DynamicThresholdSecretSharingVersion9App {
     }
 
     /**
-     * 主份额更新协议：严格按照文档4.5.2节实现
+     * 主份额更新协议：严格按照论文4.5.2节实现
      */
     public void mainShareUpdate(String contextInfo, int updateRound) {
         long startTime = System.nanoTime();
@@ -616,7 +616,7 @@ public class DynamicThresholdSecretSharingVersion9App {
     }
 
     /**
-     * 基于工作份额的秘密恢复：严格按照文档4.6.1节实现
+     * 基于工作份额的秘密恢复：严格按照论文4.6.1节实现
      */
     public BigInteger secretRecoveryFromWorkingShares(List<Integer> participantIndices, boolean flag) {
         long startTime = System.nanoTime();
@@ -656,7 +656,7 @@ public class DynamicThresholdSecretSharingVersion9App {
     }
 
     /**
-     * 基于主份额的秘密恢复：严格按照文档4.6.1节实现
+     * 基于主份额的秘密恢复：严格按照论文4.6.1节实现
      */
     public BigInteger secretRecoveryFromMainShares(List<Integer> participantIndices,boolean flag) {
         long startTime = System.nanoTime();
@@ -835,7 +835,7 @@ public class DynamicThresholdSecretSharingVersion9App {
     }
 
     /**
-     * 生成随机种子：严格按照文档4.5.1节步骤一实现
+     * 生成随机种子：严格按照论文4.5.1节步骤一实现
      */
     private BigInteger generateRandomSeed(String contextInfo, int round) {
         try {
@@ -867,7 +867,7 @@ public class DynamicThresholdSecretSharingVersion9App {
     }
 
     /**
-     * 生成更新多项式：严格按照文档4.5.1节步骤二实现
+     * 生成更新多项式：严格按照论文4.5.1节步骤二实现
      */
     private BivariatePolynomial generateUpdatePolynomial(BigInteger seed, int threshold) {
         SecureRandom prng = BCCryptoUtils.createSecureRandom(seed.toByteArray());
@@ -996,7 +996,7 @@ public class DynamicThresholdSecretSharingVersion9App {
 
     /**
      * 双变量多项式类：表示对称双变量多项式
-     * 对应文档4.2节双变量多项式定义
+     * 对应论文4.2节双变量多项式定义
      */
     private static class BivariatePolynomial {
         private int degree;
@@ -1055,7 +1055,7 @@ public class DynamicThresholdSecretSharingVersion9App {
 
         /**
          * 计算多项式在给定点(x,y)的值
-         * 对应文档4.2节多项式求值
+         * 对应论文4.2节多项式求值
          */
         public BigInteger evaluate(BigInteger x, BigInteger y) {
             BigInteger result = BigInteger.ZERO;
@@ -1073,7 +1073,7 @@ public class DynamicThresholdSecretSharingVersion9App {
 
         /**
          * 在给定x值下计算多项式，得到关于y的单变量多项式
-         * 对应文档4.3.1节主份额计算
+         * 对应论文4.3.1节主份额计算
          */
         public UnivariatePolynomial evaluateAtX(BigInteger x) {
             BigInteger[] newCoeffs = new BigInteger[degree + 1];
@@ -1114,7 +1114,7 @@ public class DynamicThresholdSecretSharingVersion9App {
 
     /**
      * 单变量多项式类：表示关于y的单变量多项式
-     * 对应文档4.3.1节主份额定义
+     * 对应论文4.3.1节主份额定义
      */
     private static class UnivariatePolynomial {
         private BigInteger[] coefficients;
@@ -1139,7 +1139,7 @@ public class DynamicThresholdSecretSharingVersion9App {
 
         /**
          * 多项式加法
-         * 对应文档4.5.2节主份额更新
+         * 对应论文4.5.2节主份额更新
          */
         public UnivariatePolynomial add(UnivariatePolynomial other) {
             int maxLength = Math.max(coefficients.length, other.coefficients.length);
@@ -1224,7 +1224,7 @@ public class DynamicThresholdSecretSharingVersion9App {
                             //system.mainShareUpdate("test_update", 1);
                             break;
 
-                        case "increase":
+                        case "Pre-expansion":
                             // 阈值扩展测试，INCREASE_THRESHOLDS为扩展阶数
                             if (expVerbose) {
                                 System.out.println("\n=== 阈值扩展测试开始， 扩展阶数为："+INCREASE_THRESHOLDS+" ===");
@@ -1234,7 +1234,7 @@ public class DynamicThresholdSecretSharingVersion9App {
                                 system.thresholdIncrease(increaseThreshold);
                             }
                             break;
-                        case "adjust":
+                        case "increase":
                             //阈值上调
                             if (expVerbose) {
                                 System.out.println("\n=== 阈值上调测试开始 ===");
@@ -1286,14 +1286,14 @@ public class DynamicThresholdSecretSharingVersion9App {
                     }
 
                     BigInteger recoveredFromWorking = system.secretRecoveryFromWorkingShares(recoveryParticipants,true);
-                    //BigInteger recoveredFromMain = system.secretRecoveryFromMainShares(recoveryMainParticipants,true);
+                    BigInteger recoveredFromMain = system.secretRecoveryFromMainShares(recoveryMainParticipants,true);
 
 
-                    if (!recoveredFromWorking.equals(system.secret)) {
+                    // 验证恢复的正确性
+                    if (!recoveredFromWorking.equals(system.secret) || !recoveredFromMain.equals(system.secret)) {
                         failureCount++;
                         if (expVerbose) {
-                            System.out.println("恢复失败！工作份额恢复: " + recoveredFromWorking +
-                                    ", 期望: " + system.secret);
+                            System.out.println("恢复失败！工作份额恢复: " + recoveredFromWorking + ", 主份额恢复: " + recoveredFromMain + ", 期望: " + system.secret);
                         }
                     } else {
                         successCount++;
@@ -1361,7 +1361,7 @@ public class DynamicThresholdSecretSharingVersion9App {
      * 主方法：程序入口点
      */
     public static void main(String[] args) {
-        System.out.println("开始动态阈值秘密共享系统性能测试（严格遵循文档方案）...");
+        System.out.println("开始动态阈值秘密共享系统性能测试（严格遵论文方案）...");
         System.out.println("参数设置: n=" + NUM_PARTICIPANTS + ", 阈值=" + Arrays.toString(THRESHOLDS));
         System.out.println("实验次数: " + NUM_EXPERIMENTS);
         System.out.println("素数位数: " + PRIME_BIT_LENGTH);
@@ -1376,8 +1376,9 @@ public class DynamicThresholdSecretSharingVersion9App {
         Map<String, Map<Integer, Integer>> failureCounts = new ConcurrentHashMap<>();
 
         // 初始化统计映射
-        String[] testTypes = {"adjust","basic"};
-        //String[] testTypes = {"basic","increase","mixed","adjust"};
+        //String[] testTypes = {"increase"};//Threshold Increase
+        //String[] testTypes = {"basic","Pre-expansion","mixed"};
+        String[] testTypes = {"increase","Pre-expansion","mixed"};
         for (String testType : testTypes) {
             testTypeStats.put(testType, new ConcurrentHashMap<>());
             successCounts.put(testType, new ConcurrentHashMap<>());
@@ -1479,7 +1480,7 @@ public class DynamicThresholdSecretSharingVersion9App {
 
         Map<Integer, Map<String, Double>> chartData = new TreeMap<>();
 
-        System.out.println("\n阈值(t) | 系统初始化(ms) | 阈值下调(ms) | 阈值扩展(ms) | 阈值上调(ms) | 工作份额更新(ms) | 主份额更新(ms) | 工作份额恢复(ms) | 主份额恢复(ms) | 混合场景(ms)");
+        System.out.println("\n阈值(t) | 系统初始化(ms) | 阈值下调(ms) | 阈值预扩展(ms) | 阈值上调(ms) | 工作份额更新(ms) | 主份额更新(ms) | 工作份额恢复(ms) | 主份额恢复(ms) | 混合场景(ms)");
         System.out.println("--------|---------------|-------------|-------------|-------------|-----------------|---------------|-----------------|---------------|-------------");
 
         for (int threshold : THRESHOLDS) {
@@ -1500,7 +1501,7 @@ public class DynamicThresholdSecretSharingVersion9App {
 
             tData.put("系统初始化(ms)", initTime);
             tData.put("阈值下调(ms)", thresholdTime);
-            tData.put("阈值扩展(ms)", thresholdIncreaseTime);
+            tData.put("阈值预扩展(ms)", thresholdIncreaseTime);
             tData.put("阈值上调(ms)", thresholdUpTime);
             tData.put("工作份额更新(ms)", workingUpdateTime);
             tData.put("主份额更新(ms)", masterUpdateTime);
@@ -1517,7 +1518,7 @@ public class DynamicThresholdSecretSharingVersion9App {
         System.out.println("\n计算开销分析:");
         System.out.println("- 系统初始化: O(t²)多项式生成 + O(n·t²)主份额计算 + O(n)工作份额计算");
         System.out.println("- 阈值下调: O(t³)拉格朗日计算 + O(t·t'²)重共享多项式 + O(n·t²)加密 + O(n²·t)解密");
-        System.out.println("- 阈值扩展: O(t'²)扩展多项式 + O(n·t'²)份额更新");
+        System.out.println("- 阈值预扩展: O(t'²)扩展多项式 + O(n·t'²)份额更新");
         System.out.println("- 工作份额更新: O(t²)多项式生成 + O(n·t)份额更新");
         System.out.println("- 主份额更新: O(t²)多项式生成 + O(n·t²)主份额更新");
         System.out.println("- 秘密恢复: O(t²)拉格朗日插值");
